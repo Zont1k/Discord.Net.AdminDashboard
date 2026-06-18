@@ -1,4 +1,3 @@
-using System.Reflection;
 using Discord.Net.AdminDashboard.Hubs;
 using Discord.Net.AdminDashboard.Models;
 using Discord.Net.Scheduler.Scheduling;

@@ -63,7 +63,6 @@
             <div class="info-row"><span class="info-key">Uptime</span><span class="info-value" id="infoUptime">--</span></div>
             <div class="info-row"><span class="info-key">CPU</span><span class="info-value" id="infoCpu">--</span></div>
             <div class="info-row"><span class="info-key">Memory</span><span class="info-value" id="infoMemory">--</span></div>
-            <div class="info-row"><span class="info-key">Shards</span><span class="info-value" id="infoShards">--</span></div>
           </div>
         </div>
         <div class="info-card">
@@ -90,7 +89,6 @@ async function loadStats() {
     document.getElementById('infoUptime').textContent = s.uptimeHours + 'h';
     document.getElementById('infoCpu').textContent = s.cpuPercent + '%';
     document.getElementById('infoMemory').textContent = s.memoryMb + ' MB';
-    document.getElementById('infoShards').textContent = s.shardCount;
     document.getElementById('infoPending').textContent = s.pendingJobs;
     document.getElementById('infoFailed').textContent = s.failedJobs;
     document.getElementById('pingText').textContent = s.latencyMs;
