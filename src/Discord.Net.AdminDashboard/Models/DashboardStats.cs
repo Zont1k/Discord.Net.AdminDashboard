@@ -12,4 +12,12 @@ public sealed class DashboardStats
     public double CpuPercent { get; init; }
     public double MemoryMb { get; init; }
     public long LatencyMs { get; init; }
+    public int MessagesSent { get; init; }
+    public int CommandsExecuted { get; init; }
+    public double CpuCores { get; init; }
+    public double TotalMemoryMb { get; init; }
+    public string? BotName { get; init; }
+    public string? BotDiscriminator { get; init; }
+    public string? BotAvatarUrl { get; init; }
+    public DateTimeOffset BotCreatedAt { get; init; }
 }

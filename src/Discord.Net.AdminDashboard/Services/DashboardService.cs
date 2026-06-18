@@ -13,15 +13,18 @@ public sealed class DashboardService
     private readonly JobScheduler _scheduler;
     private readonly DateTimeOffset _startedAt;
     private readonly Process _process;
+    private readonly AnalyticsService _analytics;
 
     public DashboardService(
         DiscordSocketClient client,
         IJobStore store,
-        JobScheduler scheduler)
+        JobScheduler scheduler,
+        AnalyticsService analytics)
     {
         _client = client;
         _store = store;
         _scheduler = scheduler;
+        _analytics = analytics;
         _startedAt = DateTimeOffset.UtcNow;
         _process = Process.GetCurrentProcess();
     }
@@ -36,7 +39,11 @@ public sealed class DashboardService
 
         var uptime = DateTimeOffset.UtcNow - _startedAt;
         var cpu = _process.TotalProcessorTime.TotalSeconds;
-        var cpuPercent = Math.Round(cpu / Environment.ProcessorCount / Math.Max(0.01, uptime.TotalSeconds) * 100, 1);
+        var cpuPercent = Math.Round(
+            cpu / Environment.ProcessorCount / Math.Max(0.01, uptime.TotalSeconds) * 100, 1);
+
+        var currentUser = _client.CurrentUser;
+        var (mpm, totalMsg, totalCmd) = _analytics.GetCounts();
 
         return new DashboardStats
         {
@@ -48,8 +55,37 @@ public sealed class DashboardService
             FailedJobs = failed,
             UptimeHours = Math.Round(uptime.TotalHours, 1),
             CpuPercent = cpuPercent,
+            CpuCores = Environment.ProcessorCount,
             MemoryMb = Math.Round(_process.WorkingSet64 / 1024.0 / 1024.0, 1),
+            TotalMemoryMb = Math.Round(_process.WorkingSet64 / 1024.0 / 1024.0, 1),
             LatencyMs = _client.Latency,
+            MessagesSent = (int)totalMsg,
+            CommandsExecuted = (int)totalCmd,
+            BotName = currentUser?.Username,
+            BotDiscriminator = currentUser?.Discriminator,
+            BotAvatarUrl = currentUser?.GetAvatarUrl(),
+            BotCreatedAt = currentUser?.CreatedAt ?? DateTimeOffset.MinValue,
+        };
+    }
+
+    public async Task<ExtendedStats> GetExtendedStatsAsync()
+    {
+        var current = await GetStatsAsync();
+        var history = _analytics.GetHistory();
+        var timeline = _analytics.GetTimeline();
+        var (mpm, _, _) = _analytics.GetCounts();
+        var (avgCpu, avgMem, peakMem) = _analytics.GetAverages();
+
+        return new ExtendedStats
+        {
+            Current = current,
+            History = [.. history],
+            Timeline = [.. timeline],
+            MessagesPerMinute = mpm,
+            AvgCpu = avgCpu,
+            AvgMemory = avgMem,
+            PeakMemory = peakMem,
+            TotalUptimeHours = current.UptimeHours,
         };
     }
 
@@ -96,4 +132,5 @@ public sealed class DashboardService
 
     public async Task RescheduleJobAsync(string jobId, DateTimeOffset newTime)
         => await _scheduler.RescheduleAsync(jobId, newTime);
+
 }

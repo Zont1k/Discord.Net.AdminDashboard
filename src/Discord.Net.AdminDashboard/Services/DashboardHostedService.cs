@@ -54,9 +54,32 @@ public sealed class DashboardHostedService : IHostedService, IAsyncDisposable
         builder.Services.AddSingleton(_client);
         builder.Services.AddSingleton(_store);
         builder.Services.AddSingleton(_scheduler);
-        builder.Services.AddSingleton(sp => new DashboardService(_client, _store, _scheduler));
+
+        var analytics = new AnalyticsService(_client, _store);
+        builder.Services.AddSingleton(analytics);
+        builder.Services.AddSingleton(sp => new DashboardService(
+            _client, _store, _scheduler, sp.GetRequiredService<AnalyticsService>()));
 
         var app = builder.Build();
+
+        if (!string.IsNullOrEmpty(_options.AccessToken))
+        {
+            app.Use(async (ctx, next) =>
+            {
+                if (ctx.Request.Path.StartsWithSegments("/api"))
+                {
+                    var token = ctx.Request.Headers["Authorization"]
+                        .FirstOrDefault()?.Replace("Bearer ", "");
+                    if (token != _options.AccessToken)
+                    {
+                        ctx.Response.StatusCode = 401;
+                        await ctx.Response.WriteAsync("Unauthorized");
+                        return;
+                    }
+                }
+                await next();
+            });
+        }
 
         var embeddedProvider = new EmbeddedFileProvider(
             typeof(DashboardHostedService).Assembly,
@@ -70,8 +93,17 @@ public sealed class DashboardHostedService : IHostedService, IAsyncDisposable
         app.MapGet("/api/stats", async (DashboardService ds) =>
             await ds.GetStatsAsync());
 
+        app.MapGet("/api/extended", async (DashboardService ds) =>
+            await ds.GetExtendedStatsAsync());
+
         app.MapGet("/api/guilds", (DashboardService ds) =>
             ds.GetGuilds());
+
+        app.MapGet("/api/guilds/{id:long}", (ulong id, DashboardService ds) =>
+        {
+            var guild = ds.GetGuild(id);
+            return guild is not null ? Results.Ok(guild) : Results.NotFound(new ApiError { Error = "Guild not found" });
+        });
 
         app.MapGet("/api/jobs", async (DashboardService ds) =>
         {
@@ -84,6 +116,7 @@ public sealed class DashboardHostedService : IHostedService, IAsyncDisposable
                 NextExecution = j.NextExecution,
                 CronExpression = j.CronExpression,
                 CreatedAt = j.CreatedAt,
+                LastError = j.LastError,
             }).ToList();
         });
 
@@ -92,6 +125,31 @@ public sealed class DashboardHostedService : IHostedService, IAsyncDisposable
             await ds.CancelJobAsync(id);
             return Results.Ok();
         });
+
+        app.MapPost("/api/jobs/{id}/reschedule", async (string id, DateTimeOffset time, DashboardService ds) =>
+        {
+            await ds.RescheduleJobAsync(id, time);
+            return Results.Ok();
+        });
+
+        app.MapGet("/api/analytics/history", (AnalyticsService analytics) =>
+            analytics.GetHistory());
+
+        app.MapGet("/api/analytics/timeline", (AnalyticsService analytics, int count = 50) =>
+            analytics.GetTimeline(count));
+
+        app.MapPost("/api/analytics/track-command", (TrackCommandRequest req, AnalyticsService analytics) =>
+        {
+            analytics.TrackCommand(req.Command, req.UserName, req.GuildName);
+            return Results.Ok();
+        });
+
+        app.MapGet("/api/health", () => Results.Ok(new
+        {
+            status = "healthy",
+            timestamp = DateTimeOffset.UtcNow,
+            connected = _client.ConnectionState == Discord.ConnectionState.Connected,
+        }));
 
         _app = app;
         _logger.LogInformation("Dashboard running at http://localhost:{Port}", _options.Port);
@@ -116,4 +174,11 @@ public sealed class DashboardOptions
 {
     public int Port { get; set; } = 5000;
     public string? AccessToken { get; set; }
+}
+
+public sealed class TrackCommandRequest
+{
+    public required string Command { get; init; }
+    public string? UserName { get; init; }
+    public string? GuildName { get; init; }
 }

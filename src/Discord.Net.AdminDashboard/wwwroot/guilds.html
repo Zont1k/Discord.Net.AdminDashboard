@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guilds - Discord.Net Admin</title>
+<title>Guilds - Discord Bot Admin</title>
 <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
@@ -11,61 +11,115 @@
   <nav class="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#5865f2"/><text x="14" y="19" text-anchor="middle" fill="white" font-size="14" font-weight="700">D</text></svg>
-        <span class="sidebar-brand">Admin Panel</span>
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="6" fill="#4f8ef7"/><text x="13" y="18" text-anchor="middle" fill="white" font-size="14" font-weight="800" font-family="sans-serif">D</text></svg>
+        <span class="sidebar-brand">BotPanel</span>
       </div>
+      <span class="sidebar-badge">v2.0</span>
     </div>
     <div class="sidebar-nav">
-      <a href="/" class="nav-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</a>
-      <a href="/guilds.html" class="nav-item active"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Guilds</a>
-      <a href="/jobs.html" class="nav-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Jobs</a>
-      <a href="/logs.html" class="nav-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Logs</a>
+      <div class="sidebar-section-label">Navigation</div>
+      <a href="/" class="nav-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Overview
+      </a>
+      <a href="/guilds.html" class="nav-item active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Guilds
+      </a>
+      <a href="/jobs.html" class="nav-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Jobs
+      </a>
+      <a href="/logs.html" class="nav-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Logs
+      </a>
     </div>
     <div class="sidebar-footer">
-      <div class="status-badge"><span class="status-dot"></span>Connected</div>
-      <span class="sidebar-version">v1.0.0</span>
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        <span>Connected</span>
+      </div>
+      <span class="sidebar-version">v2.0.0</span>
     </div>
   </nav>
   <div class="main-area">
     <header class="topbar">
       <h1 class="page-title">Guilds</h1>
-      <span id="guildCount" style="font-size:13px;color:var(--text-secondary)"></span>
+      <div class="topbar-right">
+        <span style="font-size:12px;color:var(--text-secondary)" id="guildCountLabel">Loading...</span>
+      </div>
     </header>
     <main class="content">
-      <div id="guildsContainer" class="guilds-list"></div>
+      <div class="guilds-toolbar">
+        <input type="text" class="guild-search" id="guildSearch" placeholder="Search guilds..." oninput="filterGuilds()">
+        <span style="font-size:11px;color:var(--text-muted)" id="guildFilterCount"></span>
+      </div>
+      <div id="guildsContainer" class="guilds-grid"></div>
     </main>
   </div>
 </div>
 <script>
+let allGuilds = [];
+
 async function loadGuilds() {
   try {
     const res = await fetch('/api/guilds');
     if (!res.ok) throw new Error(res.statusText);
-    const guilds = await res.json();
-    document.getElementById('guildCount').textContent = guilds.length + ' servers';
-    const html = guilds.map(g => {
-      const iconHtml = g.iconUrl
-        ? `<img src="${g.iconUrl}" alt="${g.name}">`
-        : `<div class="guild-initials">${g.initials}</div>`;
-      return `<div class="guild-row">
-        <div class="guild-icon">${iconHtml}</div>
-        <div class="guild-info">
-          <div class="guild-name">${g.name}</div>
-          <div class="guild-meta">${g.memberCount} members<span class="meta-sep">·</span>${g.channelCount} channels<span class="meta-sep">·</span>${g.roleCount} roles</div>
-        </div>
-        <div class="guild-stats">
-          <div class="guild-online"><span class="online-dot"></span>${g.onlineCount} online</div>
-        </div>
-      </div>`;
-    }).join('');
-    document.getElementById('guildsContainer').innerHTML = html;
+    allGuilds = await res.json();
+    document.getElementById('guildCountLabel').textContent = allGuilds.length + ' servers total';
+    renderGuilds(allGuilds);
   } catch (e) {
     console.error('Failed to load guilds:', e);
-    document.getElementById('guildsContainer').innerHTML = '<div class="empty-state">Failed to load guilds. Is the bot connected?</div>';
+    document.getElementById('guildsContainer').innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#9888;</div><div class="empty-state-title">Connection Error</div><div class="empty-state-desc">Failed to load guilds. Is the bot connected?</div></div>';
   }
 }
+
+function renderGuilds(guilds) {
+  document.getElementById('guildFilterCount').textContent = guilds.length + ' shown';
+  const html = guilds.map(g => {
+    const iconHtml = g.iconUrl
+      ? `<img src="${g.iconUrl}" alt="${g.name}">`
+      : `<div class="guild-initials">${g.initials}</div>`;
+    return `<div class="guild-card">
+      <div class="guild-icon">${iconHtml}</div>
+      <div class="guild-info">
+        <div class="guild-name">${escapeHtml(g.name)}</div>
+        <div class="guild-meta">
+          <span class="guild-meta-item">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            ${g.channelCount} channels
+          </span>
+          <span class="guild-meta-item">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ${g.roleCount} roles
+          </span>
+        </div>
+      </div>
+      <div class="guild-card-stats">
+        <div class="guild-member-count">${g.onlineCount}</div>
+        <div class="guild-member-label">/ ${g.memberCount} online</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('guildsContainer').innerHTML = html;
+}
+
+function filterGuilds() {
+  const q = document.getElementById('guildSearch').value.toLowerCase();
+  if (!q) { renderGuilds(allGuilds); return; }
+  const filtered = allGuilds.filter(g => g.name.toLowerCase().includes(q));
+  renderGuilds(filtered);
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
 loadGuilds();
-setInterval(loadGuilds, 10000);
+setInterval(loadGuilds, 15000);
 </script>
 </body>
 </html>

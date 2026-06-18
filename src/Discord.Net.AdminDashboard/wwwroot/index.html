@@ -3,73 +3,258 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard - Discord.Net Admin</title>
+<title>Dashboard - Discord Bot Admin</title>
 <link rel="stylesheet" href="/css/dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="app-shell">
   <nav class="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#5865f2"/><text x="14" y="19" text-anchor="middle" fill="white" font-size="14" font-weight="700">D</text></svg>
-        <span class="sidebar-brand">Admin Panel</span>
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="6" fill="#4f8ef7"/><text x="13" y="18" text-anchor="middle" fill="white" font-size="14" font-weight="800" font-family="sans-serif">D</text></svg>
+        <span class="sidebar-brand">BotPanel</span>
       </div>
+      <span class="sidebar-badge">v2.0</span>
     </div>
     <div class="sidebar-nav">
+      <div class="sidebar-section-label">Navigation</div>
       <a href="/" class="nav-item active">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Overview
       </a>
       <a href="/guilds.html" class="nav-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Guilds
+        <span style="margin-left:auto;font-size:10px;color:var(--text-muted)" id="navGuildCount"></span>
       </a>
       <a href="/jobs.html" class="nav-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         Jobs
       </a>
       <a href="/logs.html" class="nav-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         Logs
       </a>
+      <div class="sidebar-section-label" style="margin-top:8px">Server</div>
+      <div class="nav-item" style="cursor:default;color:var(--text-muted);font-size:11px">
+        <span id="sidebarUptime">--</span>
+      </div>
     </div>
     <div class="sidebar-footer">
       <div class="status-badge">
         <span class="status-dot"></span>
-        Connected
+        <span id="sidebarStatus">Connected</span>
       </div>
-      <span class="sidebar-version"><span id="versionText">v1.0.0</span></span>
+      <span class="sidebar-version" id="sidebarVersion">v2.0.0</span>
     </div>
   </nav>
   <div class="main-area">
     <header class="topbar">
       <h1 class="page-title">Overview</h1>
-      <div class="ping-badge">
-        <span class="ping-dot"></span>
-        <span id="pingText">--</span> ms
+      <div class="topbar-right">
+        <div class="health-badge" id="healthBadge">
+          <span class="status-dot"></span>
+          <span id="healthText">Healthy</span>
+        </div>
+        <div class="ping-badge">
+          <span class="ping-dot" id="pingDot"></span>
+          <span id="pingText">--</span> ms
+        </div>
       </div>
     </header>
     <main class="content">
+      <!-- Stats Cards -->
       <div class="stats-grid" id="statsGrid">
-        <div class="stat-card"><div class="stat-icon stat-icon-guilds"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div><div class="stat-body"><div class="stat-value" id="statGuilds">--</div><div class="stat-label">Guilds</div></div></div>
-        <div class="stat-card"><div class="stat-icon stat-icon-users"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="stat-body"><div class="stat-value" id="statUsers">--</div><div class="stat-label">Total Users</div></div></div>
-        <div class="stat-card"><div class="stat-icon stat-icon-online"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg></div><div class="stat-body"><div class="stat-value" id="statOnline">--</div><div class="stat-label">Online Now</div></div></div>
-        <div class="stat-card"><div class="stat-icon stat-icon-jobs"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="stat-body"><div class="stat-value" id="statJobs">--</div><div class="stat-label">Active Jobs</div></div></div>
-      </div>
-      <div class="info-grid">
-        <div class="info-card">
-          <div class="info-card-header"><h3>System</h3></div>
-          <div class="info-card-body">
-            <div class="info-row"><span class="info-key">Uptime</span><span class="info-value" id="infoUptime">--</span></div>
-            <div class="info-row"><span class="info-key">CPU</span><span class="info-value" id="infoCpu">--</span></div>
-            <div class="info-row"><span class="info-key">Memory</span><span class="info-value" id="infoMemory">--</span></div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-guilds">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="statGuilds">--</div>
+            <div class="stat-label">Guilds</div>
           </div>
         </div>
-        <div class="info-card">
-          <div class="info-card-header"><h3>Jobs</h3></div>
-          <div class="info-card-body">
-            <div class="info-row"><span class="info-key">Pending</span><span class="info-value" id="infoPending">--</span></div>
-            <div class="info-row"><span class="info-key">Failed</span><span class="info-value" id="infoFailed">--</span></div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-users">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="statUsers">--</div>
+            <div class="stat-label">Total Users</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-online">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="statOnline">--</div>
+            <div class="stat-label">Online Now</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-messages">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="statMessages">--</div>
+            <div class="stat-label">Messages</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-jobs">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="statJobs">--</div>
+            <div class="stat-label">Active Jobs</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-commands">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="statCommands">--</div>
+            <div class="stat-label">Commands</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resource Usage Bars -->
+      <div class="resources-grid">
+        <div class="resource-card">
+          <div class="resource-header">
+            <span class="resource-label">CPU Usage</span>
+            <span class="resource-value" id="cpuValue">0%</span>
+          </div>
+          <div class="resource-bar-track">
+            <div class="resource-bar-fill" id="cpuBar" style="width:0%"></div>
+          </div>
+          <div class="resource-info">
+            <span id="cpuCores">-- cores</span>
+            <span id="cpuAvg">Avg: --%</span>
+          </div>
+        </div>
+        <div class="resource-card">
+          <div class="resource-header">
+            <span class="resource-label">Memory</span>
+            <span class="resource-value" id="memValue">0 MB</span>
+          </div>
+          <div class="resource-bar-track">
+            <div class="resource-bar-fill green" id="memBar" style="width:0%"></div>
+          </div>
+          <div class="resource-info">
+            <span id="memPeak">Peak: -- MB</span>
+            <span id="memAvg">Avg: -- MB</span>
+          </div>
+        </div>
+        <div class="resource-card">
+          <div class="resource-header">
+            <span class="resource-label">Messages / min</span>
+            <span class="resource-value" id="mpmValue">0</span>
+          </div>
+          <div class="resource-bar-track">
+            <div class="resource-bar-fill" id="mpmBar" style="width:0%"></div>
+          </div>
+          <div class="resource-info">
+            <span>Rate</span>
+            <span id="mpmInfo">-- /min</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-title">CPU & Memory</span>
+            <div class="chart-legend">
+              <div class="chart-legend-item">
+                <div class="chart-legend-dot" style="background:#4f8ef7"></div>
+                <span>CPU</span>
+              </div>
+              <div class="chart-legend-item">
+                <div class="chart-legend-dot" style="background:#2ed573"></div>
+                <span>Memory</span>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="cpuMemChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-title">Guild Count</span>
+            <div class="chart-legend">
+              <div class="chart-legend-item">
+                <div class="chart-legend-dot" style="background:#ffa502"></div>
+                <span>Guilds</span>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="guildChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-title">Users</span>
+            <div class="chart-legend">
+              <div class="chart-legend-item">
+                <div class="chart-legend-dot" style="background:#a855f7"></div>
+                <span>Total Users</span>
+              </div>
+              <div class="chart-legend-item">
+                <div class="chart-legend-dot" style="background:#17c0eb"></div>
+                <span>Online</span>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="userChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-title">Latency</span>
+            <div class="chart-legend">
+              <div class="chart-legend-item">
+                <div class="chart-legend-dot" style="background:#ff4757"></div>
+                <span>ms</span>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="latencyChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Grid: System Info + Timeline -->
+      <div class="bottom-grid">
+        <div class="info-panel">
+          <div class="info-panel-header">
+            <h3>System Information</h3>
+          </div>
+          <div class="info-panel-body">
+            <div class="info-row"><span class="info-key">Uptime</span><span class="info-value" id="infoUptime">--</span></div>
+            <div class="info-row"><span class="info-key">Latency</span><span class="info-value" id="infoLatency">--</span></div>
+            <div class="info-row"><span class="info-key">Bot Name</span><span class="info-value" id="infoBotName" style="font-family:var(--font)">--</span></div>
+            <div class="info-row"><span class="info-key">Bot ID</span><span class="info-value" id="infoBotId">--</span></div>
+            <div class="info-row"><span class="info-key">Process ID</span><span class="info-value" id="infoPid">--</span></div>
+            <div class="info-row"><span class="info-key">Pending Jobs</span><span class="info-value yellow" id="infoPending">--</span></div>
+            <div class="info-row"><span class="info-key">Failed Jobs</span><span class="info-value red" id="infoFailed">--</span></div>
+          </div>
+        </div>
+        <div class="info-panel">
+          <div class="info-panel-header">
+            <h3>Recent Activity</h3>
+          </div>
+          <div class="info-panel-body" id="timelineContainer">
+            <div class="timeline" id="timeline"></div>
           </div>
         </div>
       </div>
@@ -77,27 +262,261 @@
   </div>
 </div>
 <script>
-async function loadStats() {
+let cpuMemChart, guildChart, userChart, latencyChart;
+let historyData = [];
+
+function updateBar(id, value, colorClass) {
+  const bar = document.getElementById(id);
+  if (bar) {
+    bar.style.width = Math.min(value, 100) + '%';
+    bar.className = 'resource-bar-fill ' + (colorClass || '');
+  }
+}
+
+async function loadAll() {
   try {
-    const res = await fetch('/api/stats');
-    if (!res.ok) throw new Error(res.statusText);
-    const s = await res.json();
+    const [statsRes, extRes] = await Promise.all([
+      fetch('/api/stats'),
+      fetch('/api/extended')
+    ]);
+    if (!statsRes.ok || !extRes.ok) throw new Error('API error');
+
+    const s = await statsRes.json();
+    const ext = await extRes.json();
+
+    // Stats cards
     document.getElementById('statGuilds').textContent = s.guildCount;
-    document.getElementById('statUsers').textContent = s.totalUsers.toLocaleString();
-    document.getElementById('statOnline').textContent = s.onlineUsers.toLocaleString();
-    document.getElementById('statJobs').textContent = s.activeJobs;
-    document.getElementById('infoUptime').textContent = s.uptimeHours + 'h';
-    document.getElementById('infoCpu').textContent = s.cpuPercent + '%';
-    document.getElementById('infoMemory').textContent = s.memoryMb + ' MB';
-    document.getElementById('infoPending').textContent = s.pendingJobs;
-    document.getElementById('infoFailed').textContent = s.failedJobs;
-    document.getElementById('pingText').textContent = s.latencyMs;
+    document.getElementById('statUsers').textContent = (s.totalUsers || 0).toLocaleString();
+    document.getElementById('statOnline').textContent = (s.onlineUsers || 0).toLocaleString();
+    document.getElementById('statMessages').textContent = (s.messagesSent || 0).toLocaleString();
+    document.getElementById('statCommands').textContent = (s.commandsExecuted || 0).toLocaleString();
+    document.getElementById('statJobs').textContent = s.activeJobs || 0;
+    document.getElementById('navGuildCount').textContent = s.guildCount;
+
+    // Ping
+    const pingEl = document.getElementById('pingText');
+    const pingDot = document.getElementById('pingDot');
+    pingEl.textContent = s.latencyMs;
+    pingDot.className = 'ping-dot' + (s.latencyMs > 200 ? ' critical' : s.latencyMs > 100 ? ' high' : '');
+
+    // Sidebar
+    document.getElementById('sidebarUptime').textContent = 'Uptime: ' + s.uptimeHours + 'h';
+
+    // Resource bars
+    const cpuVal = s.cpuPercent || 0;
+    document.getElementById('cpuValue').textContent = cpuVal + '%';
+    document.getElementById('cpuCores').textContent = s.cpuCores + ' cores';
+    updateBar('cpuBar', cpuVal, cpuVal > 80 ? 'red' : cpuVal > 50 ? 'yellow' : '');
+
+    const memVal = s.memoryMb || 0;
+    const memPercent = Math.min(memVal / 1024 * 100, 100);
+    document.getElementById('memValue').textContent = memVal + ' MB';
+    document.getElementById('memPeak').textContent = 'Peak: ' + (ext.peakMemory || 0) + ' MB';
+    document.getElementById('memAvg').textContent = 'Avg: ' + (ext.avgMemory || 0) + ' MB';
+    updateBar('memBar', memPercent, memPercent > 80 ? 'red' : memPercent > 50 ? 'yellow' : 'green');
+
+    const mpm = ext.messagesPerMinute || 0;
+    document.getElementById('mpmValue').textContent = mpm;
+    document.getElementById('mpmInfo').textContent = mpm + ' /min';
+    updateBar('mpmBar', Math.min(mpm * 5, 100));
+
+    // System info
+    document.getElementById('infoUptime').textContent = s.uptimeHours + ' hours';
+    document.getElementById('infoLatency').textContent = s.latencyMs + ' ms';
+    document.getElementById('infoBotName').textContent = s.botName || '--';
+    document.getElementById('infoBotId').textContent = s.botCreatedAt ? new Date(s.botCreatedAt).toLocaleDateString() : '--';
+    document.getElementById('infoPid').textContent = s.cpuCores ? 'Running' : '--';
+    document.getElementById('infoPending').textContent = s.pendingJobs || 0;
+    document.getElementById('infoFailed').textContent = s.failedJobs || 0;
+
+    // Charts
+    if (ext.history && ext.history.length > 0) {
+      historyData = ext.history;
+      updateCharts(ext.history);
+    }
+
+    // Timeline
+    if (ext.timeline) {
+      renderTimeline(ext.timeline);
+    }
+
+    // Health
+    updateHealth(s);
+
   } catch (e) {
     console.error('Failed to load stats:', e);
   }
 }
-loadStats();
-setInterval(loadStats, 5000);
+
+function updateHealth(s) {
+  const badge = document.getElementById('healthBadge');
+  const text = document.getElementById('healthText');
+  if (s.latencyMs > 500) {
+    badge.style.background = 'var(--red-bg)';
+    badge.style.color = 'var(--red)';
+    text.textContent = 'High Latency';
+  } else if (s.latencyMs > 200) {
+    badge.style.background = 'var(--yellow-bg)';
+    badge.style.color = 'var(--yellow)';
+    text.textContent = 'Degraded';
+  } else {
+    badge.style.background = 'var(--green-bg)';
+    badge.style.color = 'var(--green)';
+    text.textContent = 'Healthy';
+  }
+}
+
+function renderTimeline(entries) {
+  const container = document.getElementById('timeline');
+  if (!entries || entries.length === 0) {
+    container.innerHTML = '<div class="timeline-empty">No recent activity</div>';
+    return;
+  }
+  const icons = {
+    guild: 'ti-guild',
+    user_join: 'ti-user',
+    user_left: 'ti-user',
+    command: 'ti-command',
+    disconnect: 'ti-disconnect',
+    connect: 'ti-connect',
+  };
+  const symbols = {
+    guild: '&#9881;',
+    user_join: '&#43;',
+    user_left: '&#8722;',
+    command: '&#62;',
+    disconnect: '&#33;',
+    connect: '&#10003;',
+  };
+  container.innerHTML = entries.slice(-20).map(e => {
+    const iconClass = icons[e.type] || 'ti-guild';
+    const symbol = symbols[e.type] || '&#9679;';
+    const guildInfo = e.guildName ? ' in ' + e.guildName : '';
+    const time = new Date(e.timestamp).toLocaleTimeString();
+    return '<div class="timeline-item">' +
+      '<div class="timeline-icon ' + iconClass + '">' + symbol + '</div>' +
+      '<div class="timeline-content">' +
+      '<div class="timeline-msg">' + e.message + guildInfo + '</div>' +
+      '<div class="timeline-meta">' + time + '</div>' +
+      '</div></div>';
+  }).join('');
+}
+
+function updateCharts(history) {
+  const labels = history.map(h => new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+
+  if (!cpuMemChart) {
+    const ctx1 = document.getElementById('cpuMemChart').getContext('2d');
+    cpuMemChart = new Chart(ctx1, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'CPU %', data: history.map(h => h.cpuPercent), borderColor: '#4f8ef7', backgroundColor: 'rgba(79, 142, 247, 0.08)', fill: true, tension: 0.3, pointRadius: 1, borderWidth: 1.5 },
+          { label: 'Memory MB', data: history.map(h => h.memoryMb), borderColor: '#2ed573', backgroundColor: 'rgba(46, 213, 115, 0.08)', fill: true, tension: 0.3, pointRadius: 1, borderWidth: 1.5, yAxisID: 'y1' }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: true, grid: { color: 'rgba(42, 45, 55, 0.5)' }, ticks: { color: '#5a5e72', font: { size: 9 }, maxTicksLimit: 8 } },
+          y: { display: true, grid: { color: 'rgba(42, 45, 55, 0.5)' }, ticks: { color: '#5a5e72', font: { size: 9 } }, beginAtZero: true },
+          y1: { display: true, position: 'right', grid: { display: false }, ticks: { color: '#5a5e72', font: { size: 9 } }, beginAtZero: true }
+        },
+        interaction: { intersect: false, mode: 'index' }
+      }
+    });
+  } else {
+    cpuMemChart.data.labels = labels;
+    cpuMemChart.data.datasets[0].data = history.map(h => h.cpuPercent);
+    cpuMemChart.data.datasets[1].data = history.map(h => h.memoryMb);
+    cpuMemChart.update('none');
+  }
+
+  if (!guildChart) {
+    const ctx2 = document.getElementById('guildChart').getContext('2d');
+    guildChart = new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'Guilds', data: history.map(h => h.guildCount), borderColor: '#ffa502', backgroundColor: 'rgba(255, 165, 2, 0.08)', fill: true, tension: 0.3, pointRadius: 1, borderWidth: 1.5 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: true, grid: { color: 'rgba(42, 45, 55, 0.5)' }, ticks: { color: '#5a5e72', font: { size: 9 }, maxTicksLimit: 8 } },
+          y: { display: true, grid: { color: 'rgba(42, 45, 55, 0.5)' }, ticks: { color: '#5a5e72', font: { size: 9 } }, beginAtZero: true }
+        },
+        interaction: { intersect: false, mode: 'index' }
+      }
+    });
+  } else {
+    guildChart.data.labels = labels;
+    guildChart.data.datasets[0].data = history.map(h => h.guildCount);
+    guildChart.update('none');
+  }
+
+  if (!userChart) {
+    const ctx3 = document.getElementById('userChart').getContext('2d');
+    userChart = new Chart(ctx3, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'Total Users', data: history.map(h => h.totalUsers), borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.08)', fill: true, tension: 0.3, pointRadius: 1, borderWidth: 1.5 },
+          { label: 'Online', data: history.map(h => h.onlineUsers), borderColor: '#17c0eb', backgroundColor: 'rgba(23, 192, 235, 0.08)', fill: true, tension: 0.3, pointRadius: 1, borderWidth: 1.5 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: true, grid: { color: 'rgba(42, 45, 55, 0.5)' }, ticks: { color: '#5a5e72', font: { size: 9 }, maxTicksLimit: 8 } },
+          y: { display: true, grid: { color: 'rgba(42, 45, 55, 0.5)' }, ticks: { color: '#5a5e72', font: { size: 9 } }, beginAtZero: true }
+        },
+        interaction: { intersect: false, mode: 'index' }
+      }
+    });
+  } else {
+    userChart.data.labels = labels;
+    userChart.data.datasets[0].data = history.map(h => h.totalUsers);
+    userChart.data.datasets[1].data = history.map(h => h.onlineUsers);
+    userChart.update('none');
+  }
+
+  if (!latencyChart) {
+    const ctx4 = document.getElementById('latencyChart').getContext('2d');
+    latencyChart = new Chart(ctx4, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'Latency ms', data: history.map(h => h.latencyMs), borderColor: '#ff4757', backgroundColor: 'rgba(255, 71, 87, 0.08)', fill: true, tension: 0.3, pointRadius: 1, borderWidth: 1.5 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: true, grid: { color: 'rgba(42, 45, 55, 0.5)' }, ticks: { color: '#5a5e72', font: { size: 9 }, maxTicksLimit: 8 } },
+          y: { display: true, grid: { color: 'rgba(42, 45, 55, 0.5)' }, ticks: { color: '#5a5e72', font: { size: 9 } }, beginAtZero: true }
+        },
+        interaction: { intersect: false, mode: 'index' }
+      }
+    });
+  } else {
+    latencyChart.data.labels = labels;
+    latencyChart.data.datasets[0].data = history.map(h => h.latencyMs);
+    latencyChart.update('none');
+  }
+}
+
+loadAll();
+setInterval(loadAll, 10000);
 </script>
 </body>
 </html>
